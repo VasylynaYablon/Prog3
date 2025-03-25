@@ -20,12 +20,12 @@ def count_words(text):
     return word_count  # Повертаємо словник з підрахунком слів
 
 # Просимо користувача вибрати режим роботи
-print("Введіть 1 для обробки власного тексту (інакше використовується текст за замовчуванням): ")
+print("Enter 1 to process your own text (otherwise, the default text will be used): ")
 a = input()
 
 if a == "1":
     # Отримуємо введений текст від користувача
-    text_input = input("Введіть текст: ")
+    text_input = input("Enter your text: ")
     print("\n")  # Додаємо порожній рядок для покращення читабельності
 else:
     # Застосовуємо текст за замовчуванням
@@ -39,5 +39,5 @@ word_frequencies = count_words(text_input)
 frequent_words = [word for word, count in word_frequencies.items() if count > 3]
 
 # Виводимо результат
-print("Словник з підрахунком слів:", word_frequencies)
-print("Слова, що зустрічаються більше 3 разів:", frequent_words)
+print("Word frequency dictionary:", word_frequencies)
+print("Words appearing more than 3 times:", frequent_words)
