@@ -3,7 +3,7 @@ from datetime import datetime
 
 # Функція для хешування пароля
 def hash_password(password):
-    return hashlib.md5(password.encode()).hexdigest()
+    return hashlib.sha256(password.encode()).hexdigest()
 
 # Базовий клас користувача
 class User:
@@ -20,6 +20,10 @@ class User:
         print(f"Статус: {'Активний' if self.is_active else 'Неактивний'}")
 
     def update_password(self, new_password):
+        confirm = input("Підтвердіть новий пароль: ").strip()
+        if new_password != confirm:
+            print("Паролі не збігаються. Пароль не змінено.")
+            return
         self.password_hash = hash_password(new_password)
         print(f"Пароль користувача {self.username} було успішно змінено.")
 
@@ -136,6 +140,10 @@ class AccessControl:
         if username in self.users:
             print(f"Користувач {username} вже існує.")
             return None
+        confirm = input("Підтвердіть пароль: ").strip()
+        if password != confirm:
+            print("Паролі не збігаються. Реєстрацію скасовано.")
+            return None
         new_user = RegularUser(username, password, email, phone_number)
         self.add_user(new_user)
         print(f"Користувач {username} зареєстрований.")
@@ -144,95 +152,97 @@ class AccessControl:
 # Меню для RegularUser
 def regular_user_menu(user):
     user.update_last_login()
-    menu = (
-        "\nВиберіть дію:\n"
-        "1. Переглянути атрибути користувача\n"
-        "2. Переглянути свої дані\n"                     
-        "3. Змінити свої дані\n"
-        "4. Змінити рівень підписки\n"
-        "5. Змінити пароль\n"
-        "6. Вийти"
-    )
+    menu = """
+Виберіть дію:
+1. Переглянути атрибути користувача
+2. Переглянути свої дані
+3. Змінити свої дані
+4. Змінити рівень підписки
+5. Змінити пароль
+6. Вийти"""
     print(menu)
     while True:
-        choice = input("\nВиберіть опцію: ")
-        if choice == "1":
-            user.view_attributes()
-        elif choice == "2":
-            user.view_user_data()
-        elif choice == "3":
-            key = input("Ключ (наприклад, email): ").strip()
-            value = input(f"Значення для {key}: ").strip()
-            user.update_user_data(key, value)
-        elif choice == "4":
-            status = input("Новий статус (Silver, Gold, Platinum): ").strip()
-            user.update_membership_status(status)
-        elif choice == "5":
-            new_pass = input("Новий пароль: ").strip()
-            user.update_password(new_pass)
-        elif choice == "6":
-            break
-        else:
-            print("Невірна опція. Спробуйте ще раз.")
+        choice = input("Ваш вибір: ").strip()
+        match choice:
+            case "1":
+                user.view_attributes()
+            case "2":
+                user.view_user_data()
+            case "3":
+                key = input("Ключ (наприклад, email): ").strip()
+                value = input(f"Значення для {key}: ").strip()
+                user.update_user_data(key, value)
+            case "4":
+                status = input("Новий статус (Silver, Gold, Platinum): ").strip()
+                user.update_membership_status(status)
+            case "5":
+                new_pass = input("Новий пароль: ").strip()
+                user.update_password(new_pass)
+            case "6":
+                break
+            case _:
+                print("Невірна опція. Спробуйте ще раз.")
 
 # Меню для Administrator
 def admin_menu(admin, system):
-    menu = (
-        "\nВиберіть дію:\n"
-        "1. Переглянути атрибути\n"
-        "2. Переглянути привілеї\n"
-        "3. Деактивувати користувача\n"
-        "4. Змінити пароль\n"
-        "5. Змінити контактні дані\n"
-        "6. Показати всіх користувачів\n"
-        "7. Показати власний журнал дій\n"
-        "8. Вийти"
-    )
+    menu = """
+Виберіть дію:
+1. Переглянути атрибути
+2. Переглянути привілеї
+3. Деактивувати користувача
+4. Змінити пароль
+5. Змінити контактні дані
+6. Показати всіх користувачів
+7. Показати власний журнал дій
+8. Вийти"""
     print(menu)
     while True:
-        choice = input("\nВиберіть опцію: ")
-        if choice == "1":
-            admin.view_attributes()
-        elif choice == "2":
-            admin.view_privileges()
-        elif choice == "3":
-            name = input("Кого деактивувати: ").strip()
-            target = system.users.get(name)
-            if target:
-                admin.deactivate_user(target)
-            else:
-                print("Користувача не знайдено.")
-        elif choice == "4":
-            new_pass = input("Новий пароль: ").strip()
-            admin.update_password(new_pass)
-        elif choice == "5":
-            email = input("Новий email: ").strip()
-            admin.update_contact_info(email=email)
-        elif choice == "6":
-            print("\nСписок усіх користувачів:\n" + "-" * 40)
-            for user in system.users.values():
-                print(f"\n ➡ Користувач: {user.username}")
-                print(f"   Статус: {'Активний' if user.is_active else 'Неактивний'}")
-                if isinstance(user, RegularUser):
-                    user.view_user_data()
-                elif isinstance(user, Administrator):
-                    user.view_attributes()
-                    user.view_contact_info()
-                elif isinstance(user, GuestUser):
-                    user.view_attributes()
-                print("-" * 40)
-        elif choice == "7":
-            print(f"\nЖурнал дій адміністратора {admin.username}:")
-            if not admin.activity_log:
-                print("   Немає записів.")
-            else:
-                for entry in admin.activity_log:
-                    print(f"   {entry}")
-        elif choice == "8":
-            break
-        else:
-            print("Невірна опція. Спробуйте ще раз.")
-
+        choice = input("Ваш вибір: ").strip()
+        match choice:
+            case "1":
+                admin.view_attributes()
+            case "2":
+                admin.view_privileges()
+            case "3":
+                name = input("Кого деактивувати: ").strip()
+                target = system.users.get(name)
+                match target:
+                    case None:
+                        print("Користувача не знайдено.")
+                    case _:
+                        admin.deactivate_user(target)
+            case "4":
+                new_pass = input("Новий пароль: ").strip()
+                admin.update_password(new_pass)
+            case "5":
+                email = input("Новий email: ").strip()
+                admin.update_contact_info(email=email)
+            case "6":
+                print("\nСписок усіх користувачів:\n" + "-" * 40)
+                for user in system.users.values():
+                    print(f"\n ➡ Користувач: {user.username}")
+                    print(f"   Статус: {'Активний' if user.is_active else 'Неактивний'}")
+                    match user:
+                        case RegularUser():
+                            user.view_user_data()
+                        case Administrator():
+                            user.view_attributes()
+                            user.view_contact_info()
+                        case GuestUser():
+                            user.view_attributes()
+                    print("-" * 40)
+            case "7":
+                print(f"\nЖурнал дій адміністратора {admin.username}:")
+                match admin.activity_log:
+                    case []:
+                        print("   Немає записів.")
+                    case _:
+                        for entry in admin.activity_log:
+                            print(f"   {entry}")
+            case "8":
+                break
+            case _:
+                print("Невірна опція. Спробуйте ще раз.")
 # Основна програма
 if __name__ == "__main__":
     system = AccessControl()
@@ -249,7 +259,6 @@ if __name__ == "__main__":
         email = input("Email: ").strip()
         phone = input("Телефон: ").strip()
         phone = phone if phone else None
-
         new_user = system.register_new_user(username, password, email, phone)
         if new_user:
             regular_user_menu(new_user)

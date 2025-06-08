@@ -46,31 +46,37 @@ print("5. Вийти")
 while True:
     choice = input("\nВиберіть опцію: ")
 
-    if choice == "1":
-        name = input("Введіть назву задачі: ")
-        print("Оберіть статус:")
-        for key, value in STATUS_OPTIONS.items():
-            print(f"{key}. {value}")
-        status_choice = input("Виберіть номер статусу: ")
-        status = STATUS_OPTIONS.get(status_choice, "очікує")
-        add_task(name, status)
-    elif choice == "2":
-        name = input("Введіть назву задачі для видалення: ")
-        remove_task(name)
-    elif choice == "3":
-        name = input("Введіть назву задачі для редагування статусу: ")
-        print("Оберіть новий статус:")
-        for key, value in STATUS_OPTIONS.items():
-            print(f"{key}. {value}")
-        status_choice = input("Виберіть номер статусу: ")
-        status = STATUS_OPTIONS.get(status_choice, "очікує")
-        update_task_status(name, status)
-    elif choice == "4":
-        get_pending_tasks()
-    elif choice == "5":
-        print("Вихід з програми.")
-        print("Задачі: ", tasks)
-        get_pending_tasks()
-        break
-    else:
-        print("Невідома опція. Спробуйте ще раз.")
+    match choice:
+        case "1":
+            name = input("Введіть назву задачі: ")
+            print("Оберіть статус:")
+            for key, value in STATUS_OPTIONS.items():
+                print(f"{key}. {value}")
+            status_choice = input("Виберіть номер статусу: ")
+            status = STATUS_OPTIONS.get(status_choice, "очікує")
+            add_task(name, status)
+
+        case "2":
+            name = input("Введіть назву задачі для видалення: ")
+            remove_task(name)
+
+        case "3":
+            name = input("Введіть назву задачі для редагування статусу: ")
+            print("Оберіть новий статус:")
+            for key, value in STATUS_OPTIONS.items():
+                print(f"{key}. {value}")
+            status_choice = input("Виберіть номер статусу: ")
+            status = STATUS_OPTIONS.get(status_choice, "очікує")
+            update_task_status(name, status)
+
+        case "4":
+            get_pending_tasks()
+
+        case "5":
+            print("Вихід з програми.")
+            print("Задачі: ", tasks)
+            get_pending_tasks()
+            break
+
+        case _:
+            print("Невідома опція. Спробуйте ще раз.")
